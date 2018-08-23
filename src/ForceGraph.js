@@ -1,6 +1,4 @@
-import React, {
-  Component
-} from "react";
+import React, { Component } from "react";
 import Graph from "react-graph-vis";
 
 let ctx;
@@ -45,13 +43,15 @@ function selectNodesFromHighlight() {
 }
 
 function getStartToEnd(start, theLen) {
-  return theLen > 0 ? {
-    start: start,
-    end: start + theLen
-  } : {
-    start: start + theLen,
-    end: start
-  };
+  return theLen > 0
+    ? {
+        start: start,
+        end: start + theLen
+      }
+    : {
+        start: start + theLen,
+        end: start
+      };
 }
 
 class ForceGraph extends Component {
@@ -78,7 +78,8 @@ class ForceGraph extends Component {
         }
       },
       graph: {
-        nodes: [{
+        nodes: [
+          {
             id: 1,
             label: "Node 1"
           },
@@ -99,7 +100,8 @@ class ForceGraph extends Component {
             label: "Node 5"
           }
         ],
-        edges: [{
+        edges: [
+          {
             from: 1,
             to: 2
           },
@@ -130,38 +132,48 @@ class ForceGraph extends Component {
     canvas = this.canvasWrapperRef.current.Network.canvas.frame.canvas;
     ctx = canvas.getContext("2d");
 
-    container.oncontextmenu = function () {
+    container.oncontextmenu = function() {
       return false;
     };
 
     saveDrawingSurface();
 
     // add event watching for canvas box drawing
-    container.addEventListener("mousemove", e => {
-      // restoreDrawingSurface();
-      // rect.w = (e.pageX - this.offsetLeft) - rect.startX;
-      // rect.h = (e.pageY - this.offsetTop) - rect.startY;
-
-      // ctx.setLineDash([5]);
-      // ctx.strokeStyle = "rgb(0, 102, 0)";
-      // ctx.strokeRect(rect.startX, rect.startY, rect.w, rect.h);
-      // ctx.setLineDash([]);
-      // ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
-      // ctx.fillRect(rect.startX, rect.startY, rect.w, rect.h);
-      console.log("it's movin");
-    });
-
     container.addEventListener("mousedown", e => {
       e.preventDefault();
+
       if (e.button == 2) {
         saveDrawingSurface();
-        // rect.startX = e.pageX - this.offsetLeft;
-        // rect.startY = e.pageY - this.offsetTop;
-        // this.state.drag = true;
+        rect.startX =
+          e.pageX -
+          this.canvasWrapperRef.current.Network.body.container.offsetLeft;
+        rect.startY =
+          e.pageY -
+          this.canvasWrapperRef.current.Network.body.container.offsetTop;
+        this.state.drag = true;
         // container[0].style.cursor = "default";
         // selectNodesFromHighlight();
-        console.log("mouse down");
       }
+    });
+
+    container.addEventListener("mousemove", e => {
+      restoreDrawingSurface();
+      rect.w =
+        e.pageX -
+        this.canvasWrapperRef.current.Network.body.container.offsetLeft -
+        rect.startX;
+      rect.h =
+        e.pageY -
+        this.canvasWrapperRef.current.Network.body.container.offsetTop -
+        rect.startY;
+
+      ctx.setLineDash([5]);
+      ctx.strokeStyle = "rgb(0, 102, 0)";
+      ctx.strokeRect(rect.startX, rect.startY, rect.w, rect.h);
+      ctx.setLineDash([]);
+      ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
+      ctx.fillRect(rect.startX, rect.startY, rect.w, rect.h);
+      console.log("it's movin");
     });
 
     container.addEventListener("mouseup", e => {
@@ -188,28 +200,20 @@ class ForceGraph extends Component {
   };
 
   render() {
-    return ( <
-      div id = "graph"
-      style = {
-        {
+    return (
+      <div
+        id="graph"
+        style={{
           height: "100vh"
-        }
-      } >
-      <
-      Graph ref = {
-        this.canvasWrapperRef
-      }
-      graph = {
-        this.state.graph
-      }
-      options = {
-        this.state.options
-      }
-      events = {
-        this.events
-      }
-      /> < /
-      div >
+        }}
+      >
+        <Graph
+          ref={this.canvasWrapperRef}
+          graph={this.state.graph}
+          options={this.state.options}
+          events={this.events}
+        />
+      </div>
     );
   }
 }
