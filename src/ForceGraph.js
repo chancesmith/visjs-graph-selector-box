@@ -80,7 +80,6 @@ class ForceGraph extends Component {
   }
 
   componentDidMount() {
-    // ref on graph <Graph/> to add listeners to, maybe?
     console.log("ref:", this.canvasWrapperRef.current.Network.body.nodes);
 
     container = this.canvasWrapperRef.current.Network.canvas.frame;
@@ -131,7 +130,6 @@ class ForceGraph extends Component {
         ctx.setLineDash([]);
         ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
         ctx.fillRect(rect.startX, rect.startY, rect.w, rect.h);
-        console.log("it's movin");
       }
     });
 
@@ -141,7 +139,6 @@ class ForceGraph extends Component {
         this.state.drag = false;
         container.style.cursor = "default";
         this.selectNodesFromHighlight();
-        console.log("mouse up");
       }
     });
   }
@@ -165,13 +162,6 @@ class ForceGraph extends Component {
     var xRange = this.getStartToEnd(rect.startX, rect.w);
     var yRange = this.getStartToEnd(rect.startY, rect.h);
     var allNodes = nodes;
-    console.log(
-      "selectNodesFromHigh",
-      xRange,
-      yRange,
-      allNodes,
-      allNodes.length
-    );
     for (var i = 0; i < allNodes.length; i++) {
       var curNode = allNodes[i];
       var nodePosition = network.getPositions([curNode.id]);
@@ -179,14 +169,12 @@ class ForceGraph extends Component {
         x: nodePosition[curNode.id].x,
         y: nodePosition[curNode.id].y
       });
-      console.log("for each node", curNode, nodePosition, nodeXY);
       if (
         xRange.start <= nodeXY.x &&
         nodeXY.x <= xRange.end &&
         yRange.start <= nodeXY.y &&
         nodeXY.y <= yRange.end
       ) {
-        console.log("node added", curNode.id, nodesIdInDrawing);
         nodesIdInDrawing.push(curNode.id);
       }
     }
@@ -204,16 +192,6 @@ class ForceGraph extends Component {
           end: start
         };
   }
-
-  events = {
-    click: event => {
-      console.log("click:", event.event);
-    },
-    dragStart: event => {
-      console.log("dragStart:", event.event.center.x, event.event.center.y);
-    },
-    dragEnd: event => {}
-  };
 
   render() {
     return (
