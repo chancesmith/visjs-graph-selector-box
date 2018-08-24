@@ -10,54 +10,6 @@ let rect = [];
 let drag = false;
 var drawingSurfaceImageData;
 
-function saveDrawingSurface() {
-  drawingSurfaceImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-}
-
-function restoreDrawingSurface() {
-  ctx.putImageData(drawingSurfaceImageData, 0, 0);
-}
-
-function selectNodesFromHighlight() {
-  var fromX, toX, fromY, toY;
-  var nodesIdInDrawing = [];
-  var xRange = getStartToEnd(rect.startX, rect.w);
-  var yRange = getStartToEnd(rect.startY, rect.h);
-  var allNodes = nodes;
-  console.log("selectNodesFromHigh", xRange, yRange, allNodes, allNodes.length);
-  for (var i = 0; i < allNodes.length; i++) {
-    var curNode = allNodes[i];
-    var nodePosition = network.getPositions([curNode.id]);
-    var nodeXY = network.canvasToDOM({
-      x: nodePosition[curNode.id].x,
-      y: nodePosition[curNode.id].y
-    });
-    console.log("for each node", curNode, nodePosition, nodeXY);
-    if (
-      xRange.start <= nodeXY.x &&
-      nodeXY.x <= xRange.end &&
-      yRange.start <= nodeXY.y &&
-      nodeXY.y <= yRange.end
-    ) {
-      console.log("node added", curNode.id, nodesIdInDrawing);
-      nodesIdInDrawing.push(curNode.id);
-    }
-  }
-  network.selectNodes(nodesIdInDrawing);
-}
-
-function getStartToEnd(start, theLen) {
-  return theLen > 0
-    ? {
-        start: start,
-        end: start + theLen
-      }
-    : {
-        start: start + theLen,
-        end: start
-      };
-}
-
 class ForceGraph extends Component {
   constructor() {
     super();
@@ -141,14 +93,14 @@ class ForceGraph extends Component {
       return false;
     };
 
-    saveDrawingSurface();
+    this.saveDrawingSurface();
 
     // add event watching for canvas box drawing
     container.addEventListener("mousedown", e => {
       e.preventDefault();
 
       if (e.button == 2) {
-        saveDrawingSurface();
+        this.saveDrawingSurface();
         rect.startX =
           e.pageX -
           this.canvasWrapperRef.current.Network.body.container.offsetLeft;
@@ -157,13 +109,13 @@ class ForceGraph extends Component {
           this.canvasWrapperRef.current.Network.body.container.offsetTop;
         this.state.drag = true;
         container.style.cursor = "default";
-        selectNodesFromHighlight();
+        this.selectNodesFromHighlight();
       }
     });
 
     container.addEventListener("mousemove", e => {
       if (this.state.drag) {
-        restoreDrawingSurface();
+        this.restoreDrawingSurface();
         rect.w =
           e.pageX -
           this.canvasWrapperRef.current.Network.body.container.offsetLeft -
@@ -185,15 +137,72 @@ class ForceGraph extends Component {
 
     container.addEventListener("mouseup", e => {
       if (e.button == 2) {
-        restoreDrawingSurface();
+        this.restoreDrawingSurface();
         this.state.drag = false;
         container.style.cursor = "default";
-        selectNodesFromHighlight();
+        this.selectNodesFromHighlight();
         console.log("mouse up");
       }
     });
-    // document.addEventListener("mousemove", e => {});
-    // document.addEventListener("mouseup", e => {});
+  }
+
+  saveDrawingSurface() {
+    drawingSurfaceImageData = ctx.getImageData(
+      0,
+      0,
+      canvas.width,
+      canvas.height
+    );
+  }
+
+  restoreDrawingSurface() {
+    ctx.putImageData(drawingSurfaceImageData, 0, 0);
+  }
+
+  selectNodesFromHighlight() {
+    var fromX, toX, fromY, toY;
+    var nodesIdInDrawing = [];
+    var xRange = this.getStartToEnd(rect.startX, rect.w);
+    var yRange = this.getStartToEnd(rect.startY, rect.h);
+    var allNodes = nodes;
+    console.log(
+      "selectNodesFromHigh",
+      xRange,
+      yRange,
+      allNodes,
+      allNodes.length
+    );
+    for (var i = 0; i < allNodes.length; i++) {
+      var curNode = allNodes[i];
+      var nodePosition = network.getPositions([curNode.id]);
+      var nodeXY = network.canvasToDOM({
+        x: nodePosition[curNode.id].x,
+        y: nodePosition[curNode.id].y
+      });
+      console.log("for each node", curNode, nodePosition, nodeXY);
+      if (
+        xRange.start <= nodeXY.x &&
+        nodeXY.x <= xRange.end &&
+        yRange.start <= nodeXY.y &&
+        nodeXY.y <= yRange.end
+      ) {
+        console.log("node added", curNode.id, nodesIdInDrawing);
+        nodesIdInDrawing.push(curNode.id);
+      }
+    }
+    network.selectNodes(nodesIdInDrawing);
+  }
+
+  getStartToEnd(start, theLen) {
+    return theLen > 0
+      ? {
+          start: start,
+          end: start + theLen
+        }
+      : {
+          start: start + theLen,
+          end: start
+        };
   }
 
   events = {
