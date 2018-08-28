@@ -146,6 +146,17 @@ class ForceGraph extends Component {
         this.selectNodesFromHighlight(e.altKey);
       }
     });
+
+    document.addEventListener("keydown", e => {
+      e.preventDefault();
+      if (e.shiftKey) {
+        if (e.which === 69) console.log("go back to the last table"); /// back to last table
+        if (e.which === 81) console.log("unpin the selected nodes"); /// unpin
+      } else {
+        if (e.which === 69) console.log("explore the selected node"); /// explore
+        if (e.which === 81) console.log("pin the selected nodes"); /// pin
+      }
+    });
   }
 
   saveDrawingSurface() {
