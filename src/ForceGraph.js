@@ -128,10 +128,12 @@ class ForceGraph extends Component {
           rect.startY;
 
         ctx.setLineDash([5]);
-        ctx.strokeStyle = "rgb(0, 102, 0)";
+        ctx.strokeStyle = e.altKey ? "rgb(255, 0, 0)" : "rgb(0, 102, 0)"; // update this with actual theme colors when added to Synapse
         ctx.strokeRect(rect.startX, rect.startY, rect.w, rect.h);
         ctx.setLineDash([]);
-        ctx.fillStyle = "rgba(0, 255, 0, 0.2)";
+        ctx.fillStyle = e.altKey
+          ? "rgba(255, 0, 0, 0.2)"
+          : "rgba(0, 255, 0, 0.2)"; // update this with actual theme colors when added to Synapse
         ctx.fillRect(rect.startX, rect.startY, rect.w, rect.h);
       }
     });
@@ -141,7 +143,7 @@ class ForceGraph extends Component {
         this.restoreDrawingSurface();
         this.state.drag = false;
         container.style.cursor = "default";
-        this.selectNodesFromHighlight();
+        this.selectNodesFromHighlight(e.altKey);
       }
     });
   }
@@ -159,7 +161,7 @@ class ForceGraph extends Component {
     ctx.putImageData(drawingSurfaceImageData, 0, 0);
   }
 
-  selectNodesFromHighlight() {
+  selectNodesFromHighlight(isAltDown) {
     var fromX, toX, fromY, toY;
     var nodesIdInDrawing = [];
     var xRange = this.getStartToEnd(rect.startX, rect.w);
@@ -182,11 +184,20 @@ class ForceGraph extends Component {
       }
     }
     // update selectedNodes in state
-    network.selectNodes([...network.getSelectedNodes(), ...nodesIdInDrawing]);
     const currentNodes = network.getSelectedNodes();
-    this.setState({
-      selectedNodes: currentNodes
-    });
+    if (!isAltDown) {
+      // if the alt key is not down, add to the selection
+      network.selectNodes([...currentNodes, ...nodesIdInDrawing]);
+      this.setState({
+        selectedNodes: currentNodes
+      });
+    } else if (isAltDown) {
+      // if the alt key is down, remove from the selection
+      const nodesAfterRemoved = currentNodes.filter(id => {
+        return !(nodesIdInDrawing.indexOf(id) > -1);
+      });
+      network.selectNodes(nodesAfterRemoved);
+    }
   }
 
   getStartToEnd(start, theLen) {
