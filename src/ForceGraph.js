@@ -74,7 +74,8 @@ class ForceGraph extends Component {
             to: 5
           }
         ]
-      }
+      },
+      selectedNodes: []
     };
     this.canvasWrapperRef = React.createRef();
   }
@@ -87,6 +88,8 @@ class ForceGraph extends Component {
     canvas = this.canvasWrapperRef.current.Network.canvas.frame.canvas;
     nodes = this.state.graph.nodes;
     ctx = canvas.getContext("2d");
+
+    console.log("network", network);
 
     container.oncontextmenu = function() {
       return false;
@@ -178,7 +181,12 @@ class ForceGraph extends Component {
         nodesIdInDrawing.push(curNode.id);
       }
     }
-    network.selectNodes(nodesIdInDrawing);
+    // update selectedNodes in state
+    network.selectNodes([...network.getSelectedNodes(), ...nodesIdInDrawing]);
+    const currentNodes = network.getSelectedNodes();
+    this.setState({
+      selectedNodes: currentNodes
+    });
   }
 
   getStartToEnd(start, theLen) {
@@ -192,6 +200,16 @@ class ForceGraph extends Component {
           end: start
         };
   }
+
+  events = {
+    selectNode: e => {
+      // update selectedNodes in state
+      const currentNodes = network.getSelectedNodes();
+      this.setState({
+        selectedNodes: currentNodes
+      });
+    }
+  };
 
   render() {
     return (
